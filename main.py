@@ -1,11 +1,14 @@
 from fastapi import FastAPI
 
-from api import test_api
+from api import test_api,account_api
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
 def include_router(app):
     app.include_router(test_api.router, prefix='/test')
-    
+    app.include_router(account_api.router, prefix='/account')
+
+
 def start_application():
     app = FastAPI()
     origins = [
