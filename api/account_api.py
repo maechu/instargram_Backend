@@ -29,10 +29,6 @@ def register(data: home_schemas.UserRegister,home_db:Session=Depends(home_db)):
 
     #만약에 데이터베이스 안에 , 똑같은 user_id 가 이미 존재한다면?
     #종료시킨다. + 프론트에 오류를 전달해야해요.
-    if home_db.query(home_models.User)\
-        .filter(home_models.User.user_id == user_id ).first() != None:
-
-        return JSONResponse({'error':'user_id already exists'},status_code = 401)
 
     password = bcrypt.hashpw(password.encode(encoding='utf-8'),bcrypt.gensalt()).decode('utf-8')
     
@@ -57,3 +53,48 @@ def register(data: home_schemas.UserRegister,home_db:Session=Depends(home_db)):
         #단, 데이터가 0개이면 가장 첫번째 데이터는 없어요.
     
 
+@router.post('/id/check',tags=["account"])
+def id_check(data:home_schemas.IdCheck ,home_db:Session=Depends(home_db)):
+    try:
+        id = home_db.query(home_models.User).filter(home_models.User.user_id == data.user_id).first()
+        
+        if id != None:
+            return JSONResponse({'Error':"Id already exists"},status_code=400)
+        
+        else:
+            return JSONResponse({'Message':"Id can use"},status_code=200)
+    except Exception as e:
+        return e
+
+
+@router.post('/nick/check',tags=["account"])
+def nick_check(data:home_schemas.NicksCheck ,home_db:Session=Depends(home_db)):
+    try:
+        nick_name = home_db.query(home_models.User).filter(home_models.User.nickname == data.nickname).first()
+        
+        if nick_name != None:
+            return JSONResponse({'Error':"nick_name already exists"},status_code=400)
+        
+        else:
+            return JSONResponse({'Message':"nick_name can use"},status_code=200)
+    except Exception as e:
+        return e
+
+
+@router.post('/login',tags=["account"])
+def login(data:home_schemas.Login ,home_db:Session=Depends(home_db)):
+    try:
+        user = home_db.query(home_models.User).filter(home_models.User.user_id == data.user_id).one()
+        print(data.password)
+        if not bcrypt.checkpw(data.password.encode('utf-8'), user.password.encode('utf-8')):
+            return JSONResponse({"error":"비번 미존재"},status_code=401) # 비밀번호 오류
+
+
+        token = auth_handler.encode_token(user.user_id)
+
+        print('로그인 성공')
+    
+        return JSONResponse({'token': token})
+    except Exception as e:
+        print(e)
+        return JSONResponse({"error":"유저 미존재"},status_code=400) # 아이디 오류

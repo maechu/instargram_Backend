@@ -11,3 +11,21 @@ class UserRegister(BaseModel):
     class Config:
         orm_mode = True
         
+
+class IdCheck(BaseModel):
+    user_id:str
+    class Config:
+        orm_mode = True
+
+
+class NicksCheck(BaseModel):
+    nickname:str
+    class Config:
+        orm_mode = True
+
+
+class Login(BaseModel):
+    user_id:str
+    password:str
+    class Config:
+        orm_mode = True
